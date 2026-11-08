@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anemia Research Screening | HemaSight</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    {% include "_font_assets.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='accessibility.js') }}" defer></script>
+    <style>
+        :root { --screen-accent:var(--button-bg); --screen-accent-dark:var(--heading-color); --screen-tint:var(--accent-light); --screen-line:var(--border-color); }
+        main { width:min(920px,92%); margin:48px auto 80px; }
+        .intro { max-width:760px; margin:0 auto 28px; text-align:center; }
+        .intro h1 { font-size:clamp(2.2rem,5vw,3.6rem); letter-spacing:-.045em; line-height:1.05; margin:12px 0; }
+        .intro p { color:var(--muted-text); font-size:1.08rem; line-height:1.7; }
+        .screen-card { padding:clamp(22px,4vw,40px); margin:0 auto 22px; border:1px solid var(--screen-line); border-radius:var(--radius-large); box-shadow:var(--shadow-small); }
+        .screen-card h1,.screen-card h2 { margin:0 0 14px; letter-spacing:-.025em; text-align:center; }
+        .screen-card h2:not(:first-child) { margin-top:30px; }
+        .notice { padding:17px 19px; margin:18px 0; border:1px solid var(--border-color); border-left:4px solid var(--screen-accent); background:var(--screen-tint); border-radius:var(--radius-medium); line-height:1.6; }
+        .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 22px; }
+        .step-meta { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; margin-bottom:8px; color:var(--muted-text); font-size:.9rem; font-weight:700; }
+        #session-countdown { color:var(--heading-color); font-variant-numeric:tabular-nums; }
+        .step-track { height:8px; margin-bottom:26px; overflow:hidden; background:var(--border-color); border-radius:999px; }
+        .step-fill { width:33.333%; height:100%; background:var(--button-bg); border-radius:inherit; transition:width .25s ease; }
+        .step-heading { margin:0 0 8px; text-align:center; color:var(--heading-color); font-size:1.1rem; }
+        .field { display:grid; gap:8px; margin:15px 0; }
+        .field > label,.field legend { display:block; width:100%; font-weight:700; color:var(--heading-color); text-align:center; }
+        .field input,.field select { width:100%; min-height:48px; padding:12px 14px; color:var(--input-text); background:var(--input-bg); border:1px solid var(--border-color); border-radius:12px; font:inherit; }
+        .field input:focus { outline:3px solid var(--focus-shadow); border-color:var(--focus-color); }
+        .field input[type=file] { padding:10px; }
+        .field input[type=file]::file-selector-button { margin-right:12px; padding:9px 14px; color:var(--button-text); background:var(--button-bg); border:1px solid var(--button-bg); border-radius:var(--radius-small); font:inherit; font-weight:700; cursor:pointer; }
+        .field input[type=file]::file-selector-button:hover { background:var(--heading-color); border-color:var(--heading-color); }
+        .choice-group { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; gap:12px; width:100%; margin-top:9px; }
+        .choice { display:flex; align-items:center; gap:10px; min-height:56px; margin:0; padding:14px; color:var(--body-text); background:var(--input-bg); border:1px solid var(--border-color); border-radius:12px; font-weight:400; cursor:pointer; overflow-wrap:anywhere; transition:border-color var(--transition),background-color var(--transition); }
+        .choice:hover,.choice:has(input:checked) { border-color:var(--button-bg); background:var(--accent-light); }
+        .choice input { width:auto; min-height:0; margin:0; padding:0; flex-shrink:0; accent-color:var(--button-bg); }
+        .choice:has(input:focus-visible) { outline:3px solid var(--focus-color); outline-offset:3px; }
+        .choice-group > .choice:nth-child(3):last-child { grid-column:1/-1; justify-self:center; width:calc(50% - 6px); }
+        fieldset.field { border:0; padding:0; }
+        .help,.muted { color:var(--muted-text); font-size:.94rem; line-height:1.6; }
+        .button-row { display:flex; flex-wrap:wrap; align-items:stretch; gap:12px; margin-top:25px; }
+        .button-row button { flex:0 1 auto; min-width:0; max-width:100%; min-height:48px; border-radius:var(--radius-small); padding:11px 18px; font-weight:700; line-height:1.3; white-space:normal; overflow-wrap:anywhere; }
+        .button-row .primary { background:var(--button-bg); border-color:var(--button-bg); color:var(--button-text); }
+        .button-row .primary:hover { background:var(--heading-color); border-color:var(--heading-color); }
+        .hidden { display:none !important; }
+        #form-error { padding:12px 14px; color:var(--heading-color); background:var(--accent-light); border:1px solid var(--border-color); border-radius:var(--radius-medium); }
+        #image-preview { max-width:100%; object-fit:contain; border:1px solid var(--screen-line); }
+        .result-hero { display:grid; grid-template-columns:minmax(150px,190px) minmax(0,1fr); align-items:center; gap:clamp(12px,2.5vw,24px); padding:clamp(16px,3vw,25px); margin:20px 0; border-radius:var(--radius-large); background:linear-gradient(135deg,var(--screen-tint),var(--card-bg)); border:1px solid var(--screen-line); }
+        .score-ring { width:clamp(150px,22vw,190px); aspect-ratio:1; height:auto; justify-self:center; padding:12px; border-radius:50%; display:grid; align-content:center; justify-items:center; text-align:center; background:var(--card-bg); border:8px solid var(--accent-light); box-shadow:inset 0 0 0 1px var(--screen-line); }
+        #result-percent { max-width:100%; color:var(--screen-accent-dark); font-size:clamp(1.7rem,8vw,2.5rem); font-weight:800; letter-spacing:-.07em; line-height:1; white-space:nowrap; }
+        .score-ring span { display:block; max-width:100%; margin-top:7px; color:var(--muted-text); font-size:.72rem; line-height:1.2; overflow-wrap:anywhere; }
+        #result-status { display:inline-block; max-width:100%; padding:7px 11px; border-radius:999px; background:var(--screen-tint); color:var(--screen-accent-dark); font-size:.88rem; font-weight:750; line-height:1.3; white-space:normal; overflow-wrap:anywhere; }
+        #result-summary { margin:12px 0 0; font-size:1.02rem; line-height:1.65; }
+        .result-metrics { display:flex; flex-wrap:wrap; gap:10px; margin-top:17px; }
+        .metric-chip { flex:1 1 150px; min-width:0; max-width:100%; padding:10px 14px; border:1px solid var(--screen-line); border-radius:13px; background:var(--card-bg); color:var(--muted-text); overflow-wrap:anywhere; }
+        .metric-chip strong { display:block; color:var(--heading-color); font-size:1.05rem; }
+        .result-warning { margin-top:18px; font-size:.92rem; color:var(--muted-text); }
+        footer { text-align:center; padding:24px; color:var(--footer-text); background:var(--footer-bg); }
+        @media(max-width:620px) { main{margin-top:30px}.form-grid{grid-template-columns:1fr;gap:0}.choice-group{gap:9px}.choice{padding:11px;font-size:.9rem}.choice-group > .choice:nth-child(3):last-child{width:calc(50% - 5px)}.result-hero{grid-template-columns:minmax(0,1fr);text-align:center}.score-ring{margin:auto}.result-metrics{justify-content:center}.button-row button{flex:1 1 130px} }
+        @media(max-width:380px) { .choice-group{grid-template-columns:1fr}.choice-group > .choice:nth-child(3):last-child{grid-column:auto;justify-self:stretch;width:100%} }
+        @media (min-width:621px) and (max-width:900px) { .result-hero{grid-template-columns:minmax(150px,175px) minmax(0,1fr)}.score-ring{width:clamp(150px,20vw,175px)} }
+        html[data-text-size="extra-large"] .choice-group { grid-template-columns:minmax(0,1fr); }
+        html[data-text-size="extra-large"] .choice-group > .choice:nth-child(3):last-child { grid-column:auto; justify-self:stretch; width:100%; }
+    </style>
+</head>
+<body>
+    {% include "_navigation.html" %}
+    <main>
+        <div class="intro">
+            <div class="eyebrow">HemaSight research prototype</div>
+            <h1>Eye scan and symptom check</h1>
+            <p>Answer a few anemia-related questions, then upload a clear eye scan. The app compares the image with labeled research images and returns a limited screening estimate.</p>
+        </div>
+
+        <section id="consent-card" class="card screen-card">
+            <h2>Before you continue</h2>
+            <div class="notice">
+                <strong>This is not a medical test.</strong>
+                <p>The image model has only been evaluated on a small adult research cohort. Its estimate can be wrong and cannot confirm or rule out anemia. A blood test is needed to measure hemoglobin.</p>
+            </div>
+            <p>The available image model is intended for adults aged 19–65. Other ages can complete the questions, but the app will not return an image estimate for them.</p>
+            <div class="notice privacy-notice">
+                <strong>Privacy and data retention</strong>
+                <p>This screening processes your answers and eye image in memory for the screening request. It does not save them as a patient record.</p>
+            <p>After you click Continue, you have 15 minutes to finish the screening. When time expires, the page clears your answers and selected image, and the server will reject any later submission. This app does not save them as a patient record. Do not include your name, face, or other identifying details in your upload.</p>
+            </div>
+            <p id="session-expired" class="notice hidden" role="alert">Your 15-minute screening session expired. Start again to continue.</p>
+            <p id="session-start-error" class="hidden" role="alert"></p>
+            <label class="check-row"><input type="checkbox" id="consent-checkbox"> <span>I understand this is a research screening estimate, not a diagnosis.</span></label>
+            <div class="button-row"><button class="primary" type="button" id="begin-button" disabled>Continue</button></div>
+        </section>
+
+        <form id="screening-form" class="card screen-card hidden" enctype="multipart/form-data">
+            <div class="step-meta"><span id="step-counter">Step 1 of 3</span><span id="step-name">About the patient</span><span id="session-countdown">15:00 left</span></div>
+            <div class="step-track" role="progressbar" aria-label="Screening progress" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1"><div class="step-fill" id="step-fill"></div></div>
+            <input id="screening-session-token" name="screening_session_token" type="hidden">
+
+            <div class="screen-step" data-step="0">
+            <h2>About the patient</h2>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="age-years">Age in years</label>
+                    <input id="age-years" name="age_years" type="number" min="0.5" max="120" step="0.5" required>
+                    <span class="help">The model only returns an estimate from age 19 through 65.</span>
+                </div>
+                <div class="field">
+                    <label id="sex-label">Sex assigned at birth</label>
+                    <div class="choice-group" role="radiogroup" aria-labelledby="sex-label">
+                        <label class="choice"><input type="radio" name="sex_assigned_at_birth" value="female" required>Female</label>
+                        <label class="choice"><input type="radio" name="sex_assigned_at_birth" value="male" required>Male</label>
+                        <label class="choice"><input type="radio" name="sex_assigned_at_birth" value="prefer_not_to_answer" required>Prefer not to answer</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pregnancy-fields" class="hidden">
+                <div class="field">
+                    <label id="pregnancy-label">Is the patient currently pregnant?</label>
+                    <div class="choice-group" role="radiogroup" aria-labelledby="pregnancy-label">
+                        <label class="choice"><input type="radio" name="pregnancy_status" value="no">No</label>
+                        <label class="choice"><input type="radio" name="pregnancy_status" value="yes">Yes</label>
+                        <label class="choice"><input type="radio" name="pregnancy_status" value="unsure">Unsure</label>
+                        <label class="choice"><input type="radio" name="pregnancy_status" value="prefer_not_to_answer">Prefer not to answer</label>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="screen-step hidden" data-step="1">
+            <h2>Symptoms</h2>
+            <p class="help">These answers are shown as context. They do not change the image estimate because the image dataset does not include symptom labels.</p>
+            <div class="form-grid">
+                <div class="field"><label id="symptom-fatigue-label">Unusual tiredness or low energy</label><div class="choice-group" role="radiogroup" aria-labelledby="symptom-fatigue-label">
+                    <label class="choice"><input type="radio" name="symptom_fatigue" value="yes" required>Yes</label>
+                    <label class="choice"><input type="radio" name="symptom_fatigue" value="no" required>No</label>
+                    <label class="choice"><input type="radio" name="symptom_fatigue" value="unsure" required>Unsure</label>
+                </div></div>
+                <div class="field"><label id="symptom-weakness-label">General weakness</label><div class="choice-group" role="radiogroup" aria-labelledby="symptom-weakness-label">
+                    <label class="choice"><input type="radio" name="symptom_weakness" value="yes" required>Yes</label>
+                    <label class="choice"><input type="radio" name="symptom_weakness" value="no" required>No</label>
+                    <label class="choice"><input type="radio" name="symptom_weakness" value="unsure" required>Unsure</label>
+                </div></div>
+                <div class="field"><label id="symptom-dizziness-label">Dizziness or lightheadedness</label><div class="choice-group" role="radiogroup" aria-labelledby="symptom-dizziness-label">
+                    <label class="choice"><input type="radio" name="symptom_dizziness" value="yes" required>Yes</label>
+                    <label class="choice"><input type="radio" name="symptom_dizziness" value="no" required>No</label>
+                    <label class="choice"><input type="radio" name="symptom_dizziness" value="unsure" required>Unsure</label>
+                </div></div>
+                <div class="field"><label id="symptom-shortness-label">Shortness of breath during ordinary activity</label><div class="choice-group" role="radiogroup" aria-labelledby="symptom-shortness-label">
+                    <label class="choice"><input type="radio" name="symptom_shortness_of_breath" value="yes" required>Yes</label>
+                    <label class="choice"><input type="radio" name="symptom_shortness_of_breath" value="no" required>No</label>
+                    <label class="choice"><input type="radio" name="symptom_shortness_of_breath" value="unsure" required>Unsure</label>
+                </div></div>
+                <div class="field"><label id="symptom-pale-label">Inner lower eyelid paler than usual</label><div class="choice-group" role="radiogroup" aria-labelledby="symptom-pale-label">
+                    <label class="choice"><input type="radio" name="symptom_pale_inner_eyelid" value="yes" required>Yes</label>
+                    <label class="choice"><input type="radio" name="symptom_pale_inner_eyelid" value="no" required>No</label>
+                    <label class="choice"><input type="radio" name="symptom_pale_inner_eyelid" value="unsure" required>Unsure</label>
+                </div></div>
+                <div class="field"><label id="symptom-cold-label">Unusually cold hands or feet</label><div class="choice-group" role="radiogroup" aria-labelledby="symptom-cold-label">
+                    <label class="choice"><input type="radio" name="symptom_cold_hands_feet" value="yes" required>Yes</label>
+                    <label class="choice"><input type="radio" name="symptom_cold_hands_feet" value="no" required>No</label>
+                    <label class="choice"><input type="radio" name="symptom_cold_hands_feet" value="unsure" required>Unsure</label>
+                </div></div>
+            </div>
+            </div>
+
+            <div class="screen-step hidden" data-step="2">
+            <h2>Eye image</h2>
+            <p class="help">For this model, upload a close, in-focus photo of one eye with the lower inner eyelid visible. Keep the full eye in frame, use even lighting, and avoid flash glare, filters, mirroring, and screenshots.</p>
+            <div class="field">
+                <label for="eye-image">Select a JPG, PNG, or WEBP image (maximum 12 MB)</label>
+                <input id="eye-image" name="eye_image" type="file" accept="image/jpeg,image/png,image/webp" required>
+            </div>
+            <img id="image-preview" class="hidden" alt="Preview of the selected eye image" style="max-height:240px;border-radius:10px;margin-top:12px">
+            <p id="form-error" class="hidden" role="alert"></p>
+            </div>
+
+            <div class="button-row">
+                <button id="back-button" class="secondary" type="button" disabled>Back</button>
+                <button id="next-button" class="primary" type="button">Next</button>
+                <button id="submit-button" class="primary hidden" type="submit">Submit for screening</button>
+                <button id="cancel-button" class="secondary" type="button">Start over</button>
+            </div>
+        </form>
+
+        <section id="result-card" class="card screen-card hidden" aria-live="polite">
+            <h2>Your screening result</h2>
+            <div class="result-hero">
+                <div class="score-ring"><strong id="result-percent">—</strong><span id="result-percent-caption">screening estimate</span></div>
+                <div><p id="result-status"></p><p id="result-summary"></p></div>
+            </div>
+            <div id="estimate-block" class="result-metrics hidden">
+                <div class="metric-chip"><strong id="result-estimate">N/A</strong>Estimated hemoglobin (g/dL)</div>
+                <div class="metric-chip"><strong id="reference-value">N/A</strong>Reference cutoff (g/dL)</div>
+                <div class="metric-chip"><strong id="error-value">N/A</strong>Average model error (g/dL)</div>
+            </div>
+            <p class="muted">Reference cutoffs follow the <a href="https://www.who.int/publications/i/item/9789240088542" target="_blank" rel="noopener noreferrer">2024 WHO hemoglobin guideline</a>.</p>
+            <h3>Questionnaire context</h3>
+            <p id="symptom-summary"></p>
+            <p id="follow-up"></p>
+            <div class="notice result-warning" id="result-notice"></div>
+            <div class="button-row"><button id="restart-button" class="primary" type="button">Start a new screening</button></div>
+        </section>
+    </main>
+    <footer>HemaSight · Educational research prototype · Not a medical diagnosis</footer>
+
+    <script>
+        (() => {
+            const byId = id => document.getElementById(id);
+            const form = byId("screening-form");
+            const pregnancyFields = byId("pregnancy-fields");
+            const steps = Array.from(form.querySelectorAll(".screen-step"));
+            const stepNames = ["About the patient", "Symptoms", "Eye image"];
+            let currentStep = 0;
+            let sessionExpiresAt = 0;
+            let sessionTimer = null;
+
+            function showStep(index) {
+                currentStep = index;
+                steps.forEach((step, stepIndex) => step.classList.toggle("hidden", stepIndex !== index));
+                byId("step-counter").textContent = `Step ${index + 1} of ${steps.length}`;
+                byId("step-name").textContent = stepNames[index];
+                byId("step-fill").style.width = `${((index + 1) / steps.length) * 100}%`;
+                byId("step-fill").parentElement.setAttribute("aria-valuenow", String(index + 1));
+                byId("back-button").disabled = index === 0;
+                byId("next-button").classList.toggle("hidden", index === steps.length - 1);
+                byId("submit-button").classList.toggle("hidden", index !== steps.length - 1);
+            }
+
+            function validateCurrentStep() {
+                const controls = Array.from(steps[currentStep].querySelectorAll("input, select, textarea"));
+                const firstInvalid = controls.find(control => !control.disabled && !control.checkValidity());
+                if (!firstInvalid) return true;
+                firstInvalid.reportValidity();
+                firstInvalid.focus();
+                return false;
+            }
+
+            function clearSessionTimer() {
+                if (sessionTimer !== null) window.clearInterval(sessionTimer);
+                sessionTimer = null;
+                sessionExpiresAt = 0;
+            }
+
+            function updateSessionCountdown() {
+                if (!sessionExpiresAt) return;
+                const remaining = Math.max(0, Math.ceil((sessionExpiresAt - Date.now()) / 1000));
+                byId("session-countdown").textContent = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")} left`;
+                if (remaining === 0) expireScreeningSession();
+            }
+
+            function startSessionTimer(seconds) {
+                clearSessionTimer();
+                sessionExpiresAt = Date.now() + seconds * 1000;
+                updateSessionCountdown();
+                sessionTimer = window.setInterval(updateSessionCountdown, 1000);
+            }
+
+            function clearImagePreview() {
+                const preview = byId("image-preview");
+                if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+                delete preview.dataset.objectUrl;
+                preview.classList.add("hidden");
+                preview.removeAttribute("src");
+            }
+
+            function expireScreeningSession() {
+                clearSessionTimer();
+                form.reset();
+                byId("screening-session-token").value = "";
+                form.classList.add("hidden");
+                byId("result-card").classList.add("hidden");
+                byId("consent-card").classList.remove("hidden");
+                byId("consent-checkbox").checked = false;
+                byId("begin-button").disabled = true;
+                clearImagePreview();
+                byId("form-error").classList.add("hidden");
+                byId("session-expired").classList.remove("hidden");
+                updatePregnancyFields();
+                showStep(0);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+
+            function checkSessionExpiry() {
+                if (sessionExpiresAt && Date.now() >= sessionExpiresAt) expireScreeningSession();
+            }
+            document.addEventListener("visibilitychange", () => { if (!document.hidden) checkSessionExpiry(); });
+            window.addEventListener("focus", checkSessionExpiry);
+
+            byId("consent-checkbox").addEventListener("change", event => {
+                byId("begin-button").disabled = !event.target.checked;
+            });
+            byId("begin-button").addEventListener("click", async () => {
+                if (!byId("consent-checkbox").checked) return;
+                const button = byId("begin-button");
+                const startError = byId("session-start-error");
+                startError.classList.add("hidden");
+                button.disabled = true;
+                button.textContent = "Starting…";
+                try {
+                    const response = await fetch("/screening/session", { method: "POST" });
+                    const body = await response.json().catch(() => ({}));
+                    if (!response.ok || !body.success || !body.token) {
+                        throw new Error(body.error || "Could not start a screening session. Please try again.");
+                    }
+                    byId("screening-session-token").value = body.token;
+                    startSessionTimer(body.expires_in_seconds || 900);
+                    byId("session-expired").classList.add("hidden");
+                    byId("consent-card").classList.add("hidden");
+                    form.classList.remove("hidden");
+                    showStep(0);
+                    byId("age-years").focus();
+                } catch (error) {
+                    startError.textContent = error.message;
+                    startError.classList.remove("hidden");
+                } finally {
+                    button.textContent = "Continue";
+                    button.disabled = !byId("consent-checkbox").checked;
+                }
+            });
+
+            byId("next-button").addEventListener("click", () => {
+                if (validateCurrentStep()) {
+                    showStep(Math.min(currentStep + 1, steps.length - 1));
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+            });
+            byId("back-button").addEventListener("click", () => {
+                if (currentStep > 0) {
+                    showStep(currentStep - 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+            });
+
+            function updatePregnancyFields() {
+                const selectedSex = document.querySelector('input[name="sex_assigned_at_birth"]:checked')?.value;
+                const show = selectedSex === "female" && Number(byId("age-years").value) >= 15;
+                pregnancyFields.classList.toggle("hidden", !show);
+                document.querySelectorAll("input[name='pregnancy_status']").forEach(input => {
+                    input.required = show;
+                    if (!show) input.checked = false;
+                });
+            }
+            byId("age-years").addEventListener("input", updatePregnancyFields);
+            document.querySelectorAll("input[name='pregnancy_status']").forEach(input => input.addEventListener("change", updatePregnancyFields));
+            document.querySelectorAll("input[name='sex_assigned_at_birth']").forEach(input => input.addEventListener("change", updatePregnancyFields));
+
+            byId("eye-image").addEventListener("change", event => {
+                const file = event.target.files[0];
+                const preview = byId("image-preview");
+                if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+                delete preview.dataset.objectUrl;
+                if (!file) { clearImagePreview(); return; }
+                preview.dataset.objectUrl = URL.createObjectURL(file);
+                preview.src = preview.dataset.objectUrl;
+                preview.classList.remove("hidden");
+            });
+
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+                if (currentStep !== steps.length - 1) {
+                    if (validateCurrentStep()) showStep(Math.min(currentStep + 1, steps.length - 1));
+                    return;
+                }
+                byId("form-error").classList.add("hidden");
+                if (!validateCurrentStep() || !form.reportValidity()) return;
+                byId("submit-button").disabled = true;
+                byId("submit-button").textContent = "Processing image…";
+                try {
+                    const response = await fetch("/screening", { method: "POST", body: new FormData(form) });
+                    const body = await response.json().catch(() => ({}));
+                    if (response.status === 410) {
+                        expireScreeningSession();
+                        return;
+                    }
+                    if (!response.ok || !body.success) throw new Error(body.error || "Could not process this screening.");
+                    if (!sessionExpiresAt || Date.now() >= sessionExpiresAt) {
+                        expireScreeningSession();
+                        return;
+                    }
+                    renderResult(body.result);
+                    form.classList.add("hidden");
+                    byId("result-card").classList.remove("hidden");
+                    byId("result-card").scrollIntoView({ behavior: "smooth", block: "start" });
+                } catch (error) {
+                    byId("form-error").textContent = error.message;
+                    byId("form-error").classList.remove("hidden");
+                } finally {
+                    byId("submit-button").disabled = false;
+                    byId("submit-button").textContent = "Submit for screening";
+                }
+            });
+
+            function renderResult(result) {
+                const labels = {
+                    below_reference_signal: "Image model signal is below the reference cutoff",
+                    not_flagged_by_image_model: "Image model did not flag a low estimate",
+                    inconclusive: "Image result is inconclusive",
+                    estimate_only: "Image estimate only; no category assigned",
+                    outside_model_scope: "No image estimate available for this age group"
+                };
+                byId("result-status").textContent = labels[result.signal] || "Research result";
+                byId("result-summary").textContent = result.summary || result.message;
+                const hasPercentage = Number.isFinite(result.screening_percent);
+                byId("result-percent").textContent = hasPercentage ? `${result.screening_percent}%` : "—";
+                byId("result-percent-caption").textContent = hasPercentage
+                    ? "research screening estimate"
+                    : result.model_available
+                        ? "percentage unavailable for this reference group"
+                        : "outside evaluated age range";
+                const showEstimate = Number.isFinite(result.estimated_hb_g_dl);
+                byId("estimate-block").classList.toggle("hidden", !showEstimate);
+                if (showEstimate) {
+                    byId("result-estimate").textContent = result.estimated_hb_g_dl.toFixed(1);
+                    byId("reference-value").textContent = result.reference_cutoff_g_dl == null ? "Not applied" : result.reference_cutoff_g_dl.toFixed(1);
+                    byId("error-value").textContent = result.typical_heldout_error_g_dl == null ? "N/A" : result.typical_heldout_error_g_dl.toFixed(2);
+                }
+                byId("symptom-summary").textContent = result.symptom_count
+                    ? `Reported symptoms (${result.symptom_count}): ${result.reported_symptoms.join(", ")}.`
+                    : "No listed symptoms were reported.";
+                byId("follow-up").textContent = result.follow_up;
+                byId("result-notice").textContent = result.notice;
+            }
+
+            function restart() {
+                clearSessionTimer();
+                form.reset();
+                updatePregnancyFields();
+                showStep(0);
+                form.classList.add("hidden");
+                byId("result-card").classList.add("hidden");
+                byId("consent-card").classList.remove("hidden");
+                byId("consent-checkbox").checked = false;
+                byId("begin-button").disabled = true;
+                byId("session-expired").classList.add("hidden");
+                byId("session-start-error").classList.add("hidden");
+                clearImagePreview();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+            byId("restart-button").addEventListener("click", restart);
+            byId("cancel-button").addEventListener("click", restart);
+        })();
+    </script>
+</body>
+</html>

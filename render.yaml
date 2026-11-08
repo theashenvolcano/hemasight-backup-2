@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: hemasight
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: SCREENING_SESSION_SECRET
+        generateValue: true

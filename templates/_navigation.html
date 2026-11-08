@@ -1,0 +1,31 @@
+<nav class="site-nav shared-nav" aria-label="Main navigation">
+    <a class="brand" href="{{ url_for('home') }}">
+        <img class="brand-logo"
+             src="{{ url_for('static', filename='hemasight-logo.png') }}"
+             alt=""
+             width="38"
+             height="38">
+        <span>HemaSight</span>
+    </a>
+
+    {% set active_nav_index = {'home': 0, 'about': 1, 'questionnaire': 2, 'faqs': 3}.get(request.endpoint, 0) %}
+    <div class="nav-links sliding-nav" data-sliding-nav data-current="{{ request.endpoint }}" data-current-index="{{ active_nav_index }}" style="--slider-position: {{ active_nav_index }}; --slider-offset: {{ active_nav_index * 100 }}%;" aria-label="Pages">
+        <span class="nav-slider" data-nav-slider aria-hidden="true"></span>
+        <a href="{{ url_for('home') }}" data-nav-option draggable="false"{% if request.endpoint == 'home' %} aria-current="page"{% endif %}>Home</a>
+        <a href="{{ url_for('about') }}" data-nav-option draggable="false"{% if request.endpoint == 'about' %} aria-current="page"{% endif %}>About Us</a>
+        <a href="{{ url_for('questionnaire') }}" data-nav-option draggable="false"{% if request.endpoint == 'questionnaire' %} aria-current="page"{% endif %}>Screening</a>
+        <a href="{{ url_for('faqs') }}" data-nav-option draggable="false"{% if request.endpoint == 'faqs' %} aria-current="page"{% endif %}>FAQs</a>
+    </div>
+
+    <a href="{{ url_for('accessibility') }}"
+       class="settings-link"
+       aria-label="Accessibility settings"
+       title="Accessibility settings"{% if request.endpoint == 'accessibility' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 2.5h4l.7 2.3c.5.2 1 .5 1.5.9l2.3-.6 2 3.5-1.7 1.8v2l1.7 1.8-2 3.5-2.3-.6c-.5.4-1 .7-1.5.9l-.7 2.3h-4l-.7-2.3c-.5-.2-1-.5-1.5-.9l-2.3.6-2-3.5L5.2 13v-2L3.5 9.2l2-3.5 2.3.6c.5-.4 1-.7 1.5-.9L10 2.5Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+    </a>
+</nav>
+<script src="{{ url_for('static', filename='navigation.js') }}" defer></script>

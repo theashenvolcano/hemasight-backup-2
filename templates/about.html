@@ -1,0 +1,899 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#702F3D">
+
+    <title>About Us | HemaSight</title>
+
+    {% include "_font_assets.html" %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='accessibility.js') }}" defer></script>
+
+    <style>
+        /* ========================================
+           1. VARIABLES AND BASE STYLES
+        ======================================== */
+
+        :root {
+            --cream: #F7F5EC;
+            --burgundy: #702F3D;
+            --burgundy-dark: #49202C;
+            --burgundy-light: #F5E9EB;
+
+            --text: #30302E;
+            --muted: #6F6868;
+            --border: #E4D8D6;
+
+            --surface: #FFFFFF;
+            --page: var(--cream);
+            --hero: #F7F0E8;
+            --footer: #FFFDF9;
+
+            --focus: #702F3D;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.7;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 3px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--burgundy-dark);
+            line-height: 1.25;
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        /* ========================================
+           2. HERO
+        ======================================== */
+
+        .about-hero {
+            padding: 65px 7% 35px;
+            text-align: center;
+            background: linear-gradient(
+                to bottom,
+                var(--hero),
+                var(--page)
+            );
+        }
+
+        .hero-inner {
+            max-width: 850px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 7px 16px;
+            border: 1px solid #E7CCD2;
+            border-radius: 30px;
+            background: var(--burgundy-light);
+            color: var(--burgundy);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .about-hero h1 {
+            margin: 22px 0;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+        }
+
+        .about-hero p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: 1.15rem;
+        }
+
+        /* ========================================
+           3. GENERAL SECTIONS
+        ======================================== */
+
+        .section {
+            width: 100%;
+            padding: 75px 7%;
+        }
+
+        .section-cream {
+            background: var(--cream);
+        }
+
+        .section-inner {
+            width: 100%;
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto 42px;
+            text-align: center;
+        }
+
+        .section-tag {
+            display: inline-block;
+            color: var(--burgundy);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .section-heading h2 {
+            margin: 12px 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+            text-align: center;
+        }
+
+        .section-heading p {
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: 1.05rem;
+            text-align: center;
+        }
+
+        /* ========================================
+           4. RESEARCH APPROACH
+        ======================================== */
+
+        .approach-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 25px;
+        }
+
+        .approach-card,
+        .team-card,
+        .principle-card {
+            min-width: 0;
+            border: 1px solid var(--border);
+            border-radius: 23px;
+            background: var(--surface);
+            box-shadow: 0 8px 25px rgba(73, 32, 44, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .approach-card,
+        .principle-card {
+            padding: 30px;
+        }
+
+        .approach-card:hover,
+        .principle-card:hover,
+        .team-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 35px rgba(73, 32, 44, 0.10);
+        }
+
+        .card-icon {
+            display: flex;
+            width: 62px;
+            height: 62px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-radius: 18px;
+            background: var(--burgundy-light);
+            font-size: 1.8rem;
+        }
+
+        .approach-card h3,
+        .principle-card h3 {
+            margin: 0 0 12px;
+            font-size: 1.4rem;
+        }
+
+        .approach-card p,
+        .principle-card p {
+            margin-bottom: 0;
+            color: var(--muted);
+        }
+
+        /* ========================================
+           5. TEAM SECTION HEADING
+        ======================================== */
+
+        .team-toolbar {
+            display: flex;
+            width: 100%;
+            max-width: 750px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 0 auto 42px;
+            text-align: center;
+        }
+
+        .team-toolbar .section-tag {
+            display: block;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .team-toolbar h2 {
+            display: block;
+            width: 100%;
+            margin: 12px auto;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.25;
+            text-align: center;
+        }
+
+        .team-toolbar p {
+            display: block;
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        /* ========================================
+           6. TEAM MEMBER CARDS
+        ======================================== */
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: stretch;
+            gap: 25px;
+        }
+
+        .team-card {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 24px;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .avatar {
+            display: flex;
+            width: 92px;
+            height: 92px;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            border-radius: 50%;
+            background: linear-gradient(
+                135deg,
+                #F0DCE0,
+                #D9B8C0
+            );
+            color: var(--burgundy);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .team-card h3 {
+            width: 100%;
+            margin: 0 0 12px;
+            font-size: 1.25rem;
+            line-height: 1.35;
+            text-align: center;
+        }
+
+        .team-card .bio {
+            width: 100%;
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.94rem;
+            line-height: 1.7;
+            text-align: center;
+            white-space: normal;
+        }
+
+        /* ========================================
+           7. PROJECT PRINCIPLES
+        ======================================== */
+
+        .principle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 25px;
+        }
+
+        /* ========================================
+           8. MEDICAL DISCLAIMER
+        ======================================== */
+
+        .disclaimer {
+            max-width: 900px;
+            margin: 35px auto 0;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        /* ========================================
+           9. FOOTER
+        ======================================== */
+
+        footer {
+            padding: 25px;
+            border-top: 1px solid var(--border);
+            background: var(--footer);
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* ========================================
+           10. FONT ACCESSIBILITY
+        ======================================== */
+
+        html[data-font="arial"] body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        html[data-font="verdana"] body {
+            font-family: Verdana, Arial, sans-serif;
+        }
+
+        html[data-font="georgia"] body {
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        html[data-font="opendyslexic"] body {
+            font-family: "OpenDyslexic", Verdana, Arial, sans-serif;
+            letter-spacing: 0.025em;
+            word-spacing: 0.08em;
+        }
+
+        html[data-font="inter"] body {
+            font-family: Inter, Arial, sans-serif;
+        }
+
+        html[data-font="roboto"] body {
+            font-family: Roboto, Arial, sans-serif;
+        }
+
+        html[data-font="nunito-sans"] body {
+            font-family: "Nunito Sans", Arial, sans-serif;
+        }
+
+        html[data-font="lato"] body {
+            font-family: Lato, Arial, sans-serif;
+        }
+
+        html[data-font="atkinson-hyperlegible"] body {
+            font-family: "Atkinson Hyperlegible", Arial, sans-serif;
+        }
+
+        html[data-font="times-new-roman"] body {
+            font-family: "Times New Roman", serif;
+        }
+
+        /* ========================================
+           11. TEXT SIZE ACCESSIBILITY
+        ======================================== */
+
+        html[data-text-size="small"] body {
+            font-size: 14px;
+        }
+
+        html[data-text-size="medium"] body {
+            font-size: 16px;
+        }
+
+        html[data-text-size="large"] body {
+            font-size: 18px;
+        }
+
+        html[data-text-size="extra-large"] body {
+            font-size: 20px;
+        }
+
+        /* ========================================
+           12. DARK MODE
+        ======================================== */
+
+        html[data-theme="dark"] {
+            --text: #F0EAF0;
+            --muted: #D4C4CB;
+            --border: #59434C;
+            --surface: #30262C;
+            --page: #201E22;
+            --hero: #292127;
+            --footer: #211C20;
+
+            --burgundy: #E2A7B5;
+            --burgundy-dark: #F1D7DE;
+            --burgundy-light: #49323B;
+
+            --cream: #292127;
+            --focus: #E2A7B5;
+        }
+
+        html[data-theme="dark"] .eyebrow {
+            border-color: var(--border);
+            background: var(--burgundy-light);
+            color: var(--burgundy-dark);
+        }
+
+        html[data-theme="dark"] .avatar {
+            background: var(--burgundy-light);
+            color: var(--burgundy-dark);
+        }
+
+        /* ========================================
+           13. SOFT COLOR SCHEME
+        ======================================== */
+
+        html[data-scheme="soft"] {
+            --page: #F0F1E8;
+            --surface: #FFFFFF;
+            --cream: #F0F1E8;
+            --hero: #EAF1E8;
+
+            --burgundy: #506B61;
+            --burgundy-dark: #344B42;
+            --burgundy-light: #E0EAE3;
+
+            --border: #D6DFD6;
+            --text: #30302E;
+            --muted: #52645A;
+            --focus: #3F6253;
+        }
+
+        html[data-theme="dark"][data-scheme="soft"] {
+            --page: #252E2A;
+            --surface: #29262B;
+            --cream: #252E2A;
+            --hero: #27352E;
+            --footer: #191F1C;
+
+            --burgundy: #B2D5C2;
+            --burgundy-dark: #D7EADF;
+            --burgundy-light: #34463D;
+
+            --border: #45574D;
+            --text: #F0EAF0;
+            --muted: #C2D0C6;
+            --focus: #BDE0CC;
+        }
+
+        /* ========================================
+           14. HIGH CONTRAST
+        ======================================== */
+
+        html[data-scheme="high-contrast"] {
+            --page: #FFFFFF;
+            --surface: #FFFFFF;
+            --hero: #FFFFFF;
+            --footer: #FFFFFF;
+
+            --text: #111111;
+            --muted: #30282A;
+            --border: #49202C;
+
+            --burgundy: #720000;
+            --burgundy-dark: #380000;
+            --burgundy-light: #FFE4E4;
+
+            --focus: #005FCC;
+        }
+
+        html[data-scheme="high-contrast"] .approach-card,
+        html[data-scheme="high-contrast"] .team-card,
+        html[data-scheme="high-contrast"] .principle-card {
+            border-width: 2px;
+        }
+
+        html[data-theme="dark"][data-scheme="high-contrast"] {
+            --page: #000000;
+            --surface: #000000;
+            --hero: #000000;
+            --footer: #000000;
+
+            --text: #FFFFFF;
+            --muted: #F0E7EB;
+            --border: #FFFFFF;
+
+            --burgundy: #FFFF00;
+            --burgundy-dark: #FFFF66;
+            --burgundy-light: #242400;
+
+            --focus: #FFFF00;
+        }
+
+        /* ========================================
+           15. TABLET RESPONSIVENESS
+        ======================================== */
+
+        @media (max-width: 900px) {
+            .team-grid,
+            .principle-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* ========================================
+           16. MOBILE RESPONSIVENESS
+        ======================================== */
+
+        @media (max-width: 650px) {
+            .about-hero,
+            .section {
+                padding: 50px 6%;
+            }
+
+            .about-hero {
+                padding-bottom: 25px;
+            }
+
+            .approach-grid,
+            .team-grid,
+            .principle-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .approach-card,
+            .principle-card {
+                padding: 25px;
+            }
+
+            .team-card {
+                padding: 28px 22px;
+            }
+
+            .team-toolbar {
+                margin-bottom: 32px;
+            }
+        }
+
+        /* ========================================
+           17. REDUCED MOTION
+        ======================================== */
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include "_navigation.html" %}
+
+    <!-- HERO -->
+    <header class="about-hero">
+        <div class="hero-inner">
+
+            <span class="eyebrow">About the Project</span>
+
+            <h1>About Us</h1>
+
+            <p>
+                A student-led medical AI research project exploring camera-based
+                technology for preliminary, noninvasive anemia screening.
+            </p>
+
+        </div>
+    </header>
+
+    <main>
+
+        <!-- RESEARCH APPROACH -->
+        <section class="section section-cream" id="research">
+
+            <div class="section-inner">
+
+                <div class="section-heading">
+
+                    <span class="section-tag">Our Methodology</span>
+
+                    <h2>Our Research Approach</h2>
+
+                    <p>
+                        We are exploring how imaging and relevant medical data
+                        could be studied together to investigate noninvasive
+                        anemia screening.
+                    </p>
+
+                </div>
+
+                <div class="approach-grid">
+
+                    <article class="approach-card">
+
+                        <div class="card-icon" aria-hidden="true">👁️</div>
+
+                        <h3>Camera-Based Eye Imaging</h3>
+
+                        <p>
+                            We study images of the palpebral conjunctiva, the
+                            tissue lining the inside of the eyelid. Visible
+                            characteristics may be investigated for potential
+                            associations with hemoglobin levels.
+                        </p>
+
+                    </article>
+
+                    <article class="approach-card">
+
+                        <div class="card-icon" aria-hidden="true">💡</div>
+
+                        <h3>Image Quality and Lighting</h3>
+
+                        <p>
+                            Lighting and image quality can affect the colors
+                            captured by a camera. Considering these factors can
+                            help us investigate the reliability of image-based
+                            analysis.
+                        </p>
+
+                    </article>
+
+                    <article class="approach-card">
+
+                        <div class="card-icon" aria-hidden="true">🔬</div>
+
+                        <h3>Hemoglobin Reference Data</h3>
+
+                        <p>
+                            When available, laboratory hemoglobin measurements
+                            can provide reference values for evaluating whether
+                            image-based findings correspond with measured
+                            hemoglobin levels.
+                        </p>
+
+                    </article>
+
+                    <article class="approach-card">
+
+                        <div class="card-icon" aria-hidden="true">📋</div>
+
+                        <h3>Relevant Medical Context</h3>
+
+                        <p>
+                            Relevant medical biomarkers and optional
+                            questionnaire information may provide additional
+                            context for research, subject to appropriate
+                            privacy safeguards and data availability.
+                        </p>
+
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- TEAM -->
+        <section class="section" id="team">
+
+            <div class="section-inner">
+
+                <div class="team-toolbar">
+
+                    <span class="section-tag">
+                        The People Behind the Project
+                    </span>
+
+                    <h2>Our Team</h2>
+
+                    <p>
+                        Meet the students behind our anemia detection research.
+                    </p>
+
+                </div>
+
+                <div class="team-grid" aria-label="Research team members">
+
+                    <article class="team-card">
+
+                        <div class="avatar" aria-hidden="true">AA</div>
+
+                        <h3>Ashaz Ahmad</h3>
+
+                        <p class="bio">
+                            Ashaz Ahmad is a sophomore at Lone Star High School
+                            in Frisco, Texas. With a strong interest in medicine
+                            and a desire to make a positive impact on the world,
+                            he contributed to this project by researching
+                            anemia and relevant biomarkers to support the
+                            development and training of an AI model. The model
+                            aims to identify potential signs of anemia
+                            non-invasively using images of the palpebral
+                            conjunctiva and medical biomarkers. In his free
+                            time, he enjoys watching and playing tennis and
+                            reading.
+                        </p>
+
+                    </article>
+
+                    <article class="team-card">
+
+                        <div class="avatar" aria-hidden="true">AP</div>
+
+                        <h3>Adhidhan Arun Prabhu</h3>
+
+                        <p class="bio">
+                            Adhidhan Arun Prabhu is a 10th-grade student at
+                            Lone Star High School with a strong interest in
+                            medicine and a goal of pursuing neurology in higher
+                            education. For this project, he focused on
+                            developing, training, and testing the AI models.
+                            In his free time, he enjoys playing the saxophone
+                            and piano and playing chess online.
+                        </p>
+
+                    </article>
+
+                    <article class="team-card">
+
+                        <div class="avatar" aria-hidden="true">PK</div>
+
+                        <h3>Pranav Kurup</h3>
+
+                        <p class="bio">
+                            Pranav Kurup is a sophomore at Lone Star High School
+                            in Frisco, Texas, with a strong interest in medicine
+                            and technology. In this project, he contributed by
+                            researching anemia and developing the website to
+                            present the team's work on using artificial
+                            intelligence to investigate potential signs of
+                            anemia through noninvasive methods. He hopes to
+                            explore how technology can improve healthcare
+                            accessibility and support early detection of
+                            medical conditions.
+                        </p>
+
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- PRINCIPLES -->
+        <section class="section section-cream" id="principles">
+
+            <div class="section-inner">
+
+                <div class="section-heading">
+
+                    <span class="section-tag">What Guides Us</span>
+
+                    <h2>Our Principles</h2>
+
+                    <p>
+                        The values that guide our approach to medical AI research.
+                    </p>
+
+                </div>
+
+                <div class="principle-grid">
+
+                    <article class="principle-card">
+
+                        <div class="card-icon" aria-hidden="true">🛡️</div>
+
+                        <h3>Scientific Validation</h3>
+
+                        <p>
+                            The system must be evaluated against appropriate
+                            reference data before its performance or usefulness
+                            can be established. We aim to present findings
+                            accurately and avoid unsupported medical claims.
+                        </p>
+
+                    </article>
+
+                    <article class="principle-card">
+
+                        <div class="card-icon" aria-hidden="true">🔒</div>
+
+                        <h3>Privacy and Responsibility</h3>
+
+                        <p>
+                            Medical information and images should be handled
+                            responsibly. Research data should be used only with
+                            appropriate permissions and safeguards to protect
+                            the privacy of the people represented.
+                        </p>
+
+                    </article>
+
+                    <article class="principle-card">
+
+                        <div class="card-icon" aria-hidden="true">🌎</div>
+
+                        <h3>Healthcare Accessibility</h3>
+
+                        <p>
+                            We are interested in whether accessible technology
+                            could eventually support earlier screening and
+                            further research, particularly where access to
+                            traditional testing may be limited.
+                        </p>
+
+                    </article>
+
+                </div>
+
+                <p class="disclaimer">
+                    <strong>Medical disclaimer:</strong>
+                    This project is for research and educational purposes only.
+                    It is not a diagnostic tool and must not be used to diagnose,
+                    rule out, or treat anemia. Any potential screening method
+                    requires appropriate scientific validation and clinical
+                    evaluation. Anyone concerned about anemia should consult
+                    a qualified healthcare professional.
+                </p>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>
+            HemaSight Research Project |
+            Student-led research and educational exploration
+        </p>
+    </footer>
+
+</body>
+</html>

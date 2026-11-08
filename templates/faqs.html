@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#702F3D">
+    <title>FAQs | HemaSight</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    {% include "_font_assets.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='faqs.css') }}">
+    <script src="{{ url_for('static', filename='accessibility.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='faqs.js') }}" defer></script>
+</head>
+<body>
+    {% include "_navigation.html" %}
+    <header class="faqs-hero">
+        <span class="faqs-eyebrow">HemaSight</span>
+        <h1>FAQs</h1>
+        <p>Learn more about anemia, this screening project, and what an AI screening result can and cannot tell you.</p>
+        <p class="faqs-hint">Select a card to turn it over and read the answer.</p>
+    </header>
+    <main class="faqs-main">
+        <section class="faq-grid" aria-label="Frequently asked questions">
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-1">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">01</span><span class="faq-question">What is anemia?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-1" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">Anemia is a medical condition that occurs when the body does not have enough healthy red blood cells or hemoglobin, which is the protein responsible for carrying oxygen throughout the body. When oxygen delivery is reduced, individuals may experience symptoms such as fatigue, weakness, dizziness, or shortness of breath.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-2">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">02</span><span class="faq-question">Why is early anemia detection important?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-2" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">Early detection of anemia can help identify potential health concerns before they become more serious. By recognizing possible indicators earlier, individuals can seek medical guidance, receive appropriate testing, and take steps toward improving their health.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-3">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">03</span><span class="faq-question">What is the purpose of this anemia screening project?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-3" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">The purpose of this project is to explore how artificial intelligence can support early anemia detection through non-invasive screening methods. The goal is to develop a tool that can help identify possible signs of anemia and increase accessibility to preliminary health assessments.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-4">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">04</span><span class="faq-question">How does the AI model screen for potential signs of anemia?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-4" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">The AI model analyzes patterns within medical images and relevant health biomarkers to identify features that may be associated with anemia. By learning from medical data, the model can recognize patterns that may help indicate a potential risk of anemia.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-5">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">05</span><span class="faq-question">Is this AI tool able to diagnose anemia?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-5" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">No. This AI tool is not a replacement for professional medical evaluation, laboratory testing, or a diagnosis from a healthcare provider. It is designed as a screening and research tool to identify possible indicators that may require further medical attention.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-6">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">06</span><span class="faq-question">What information does the AI model use?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-6" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">The AI model uses relevant medical data, including image-based features and biomarkers associated with anemia. These inputs allow the model to learn patterns that may help distinguish between individuals with and without potential signs of anemia.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-7">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">07</span><span class="faq-question">How accurate is the anemia detection model?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-7" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">The accuracy of the AI model depends on the quality, size, and diversity of the data used for training and testing. The model is evaluated using performance metrics to measure how effectively it identifies patterns related to anemia. Results should be interpreted as a screening indication rather than a confirmed diagnosis.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-8">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">08</span><span class="faq-question">Who can benefit from an AI-based anemia screening tool?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-8" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">An AI-based screening tool may benefit individuals who want greater awareness of their health and researchers exploring new approaches to accessible medical screening. This technology has the potential to support earlier identification of possible anemia indicators, especially in settings where traditional testing may be less accessible.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-9">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">09</span><span class="faq-question">Is my personal health information protected?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-9" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">Protecting user information is an important part of responsible medical technology development. Any data used by the system should be handled securely and responsibly while following appropriate privacy and ethical guidelines.</span></span>
+                </span>
+            </button>
+            <button class="faq-card" type="button" aria-expanded="false" aria-controls="faq-answer-10">
+                <span class="faq-card-inner">
+                    <span class="faq-face faq-front"><span class="faq-number">10</span><span class="faq-question">What should I do if the screening suggests possible anemia?</span><span class="faq-action">Click to reveal answer</span></span>
+                    <span class="faq-face faq-back" id="faq-answer-10" aria-hidden="true"><span class="faq-answer-label">Answer</span><span class="faq-answer">If the screening indicates possible signs of anemia, individuals should consult a healthcare professional for further evaluation. A doctor may recommend additional tests, such as blood work, to confirm whether anemia is present and determine the appropriate next steps.</span></span>
+                </span>
+            </button>
+        </section>
+    </main>
+</body>
+</html>

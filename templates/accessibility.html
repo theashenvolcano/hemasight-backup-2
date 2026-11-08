@@ -1,0 +1,899 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#702F3D">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+
+    <title>Accessibility Settings | Anemia Detection</title>
+
+    <!-- Apply saved preferences before the page renders -->
+    <script>
+        (() => {
+            const defaults = {
+                theme: "light",
+                colorTheme: "burgundy-cream",
+                scheme: "default",
+                font: "arial",
+                textSize: "medium"
+            };
+
+            const allowed = {
+                theme: ["light", "dark"],
+                colorTheme: ["burgundy-cream", "sage-ivory", "medical-blue", "teal-mint", "lavender-white", "high-contrast"],
+                scheme: ["default", "soft", "high-contrast"],
+                font: ["arial", "verdana", "georgia", "opendyslexic", "inter", "roboto", "nunito-sans", "lato", "atkinson-hyperlegible", "times-new-roman"],
+                textSize: ["small", "medium", "large", "extra-large"]
+            };
+
+            try {
+                const saved = JSON.parse(
+                    localStorage.getItem("anemiaAccessibilitySettings") || "{}"
+                );
+
+                const settings = {};
+
+                for (const key of Object.keys(defaults)) {
+                    settings[key] = allowed[key].includes(saved[key])
+                        ? saved[key]
+                        : defaults[key];
+                }
+
+                if (!allowed.colorTheme.includes(settings.colorTheme)) {
+                    settings.colorTheme = saved.scheme === "soft" ? "sage-ivory"
+                        : saved.scheme === "high-contrast" ? "high-contrast" : "burgundy-cream";
+                }
+                settings.scheme = "default";
+                const root = document.documentElement;
+                root.dataset.theme = settings.theme;
+                root.dataset.scheme = "default";
+                root.dataset.colorTheme = settings.colorTheme;
+                root.dataset.font = settings.font;
+                root.dataset.textSize = settings.textSize;
+            } catch (error) {
+                // The page will use its default appearance.
+            }
+        })();
+    </script>
+
+    {% include "_font_assets.html" %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="{{ url_for('static', filename='accessibility.js') }}" defer></script>
+
+    <style>
+        :root {
+            color-scheme: light;
+
+            --burgundy: #702F3D;
+            --burgundy-dark: #49202C;
+            --burgundy-light: #F5E9EB;
+
+            --page-bg: #F7F5EC;
+            --card-bg: #FFFFFF;
+            --surface-soft: #FBF8F7;
+            --text-color: #30302E;
+            --muted-color: #6F6868;
+            --border-color: #E4D8D6;
+            --field-bg: #FFFFFF;
+            --focus-color: #702F3D;
+            --shadow: 0 8px 30px rgba(73, 32, 44, 0.055);
+            --chosen-font: var(--site-font, Arial), Helvetica, sans-serif;
+            --chosen-size: 16px;
+        }
+
+        /* Theme settings */
+        html[data-theme="dark"] {
+            color-scheme: dark;
+
+            --page-bg: #201E22;
+            --card-bg: #29262B;
+            --surface-soft: #30252B;
+            --text-color: #F0EAF0;
+            --muted-color: #C8BDC8;
+            --border-color: #494149;
+            --field-bg: #201E22;
+            --burgundy: #E2A7B5;
+            --burgundy-dark: #F1D7DE;
+            --burgundy-light: #49323B;
+            --focus-color: #F1D7DE;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.14);
+        }
+
+        /* Color schemes */
+        html[data-scheme="soft"] {
+            --page-bg: #F0F1E8;
+            --card-bg: #FFFFFF;
+            --surface-soft: #FAFCF9;
+            --text-color: #30302E;
+            --muted-color: #52645A;
+            --border-color: #D6DFD6;
+            --burgundy: #506B61;
+            --burgundy-dark: #344B42;
+            --burgundy-light: #E0EAE3;
+            --focus-color: #3F6253;
+        }
+
+        html[data-theme="dark"][data-scheme="soft"] {
+            --page-bg: #252E2A;
+            --card-bg: #29262B;
+            --surface-soft: #34463D;
+            --text-color: #F0EAF0;
+            --muted-color: #C2D0C6;
+            --border-color: #45574D;
+            --burgundy: #B2D5C2;
+            --burgundy-dark: #D7EADF;
+            --burgundy-light: #34463D;
+            --focus-color: #BDE0CC;
+        }
+
+        html[data-scheme="high-contrast"] {
+            --page-bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --surface-soft: #F4F4F4;
+            --text-color: #111111;
+            --muted-color: #292929;
+            --border-color: #333333;
+            --burgundy: #720000;
+            --burgundy-dark: #380000;
+            --burgundy-light: #FFE4E4;
+            --focus-color: #005FCC;
+            --shadow: none;
+        }
+
+        html[data-theme="dark"][data-scheme="high-contrast"] {
+            --page-bg: #000000;
+            --card-bg: #080808;
+            --surface-soft: #171717;
+            --text-color: #FFFFFF;
+            --muted-color: #FFFFFF;
+            --border-color: #FFFFFF;
+            --burgundy: #FFFF00;
+            --burgundy-dark: #FFFF66;
+            --burgundy-light: #242400;
+            --field-bg: #111111;
+            --focus-color: #FFFF00;
+            --shadow: none;
+        }
+
+        /* Font settings */
+        html[data-font="arial"] {
+            --chosen-font: Arial, Helvetica, sans-serif;
+        }
+
+        html[data-font="verdana"] {
+            --chosen-font: Verdana, Geneva, sans-serif;
+        }
+
+        html[data-font="georgia"] {
+            --chosen-font: Georgia, "Times New Roman", serif;
+        }
+
+        html[data-font="opendyslexic"] { --chosen-font: "OpenDyslexic", Verdana, sans-serif; }
+        html[data-font="inter"] { --chosen-font: "Inter", Arial, sans-serif; }
+        html[data-font="roboto"] { --chosen-font: "Roboto", Arial, sans-serif; }
+        html[data-font="nunito-sans"] { --chosen-font: "Nunito Sans", Arial, sans-serif; }
+        html[data-font="lato"] { --chosen-font: "Lato", Arial, sans-serif; }
+        html[data-font="atkinson-hyperlegible"] { --chosen-font: "Atkinson Hyperlegible", Verdana, Arial, sans-serif; }
+        html[data-font="times-new-roman"] { --chosen-font: "Times New Roman", Times, serif; }
+
+        #font-select option[value="arial"] { font-family: Arial, Helvetica, sans-serif !important; }
+        #font-select option[value="verdana"] { font-family: Verdana, Geneva, sans-serif !important; }
+        #font-select option[value="georgia"] { font-family: Georgia, "Times New Roman", serif !important; }
+        #font-select option[value="opendyslexic"] { font-family: "OpenDyslexic", Verdana, sans-serif !important; }
+        #font-select option[value="inter"] { font-family: "Inter", Arial, sans-serif !important; }
+        #font-select option[value="roboto"] { font-family: "Roboto", Arial, sans-serif !important; }
+        #font-select option[value="nunito-sans"] { font-family: "Nunito Sans", Arial, sans-serif !important; }
+        #font-select option[value="lato"] { font-family: "Lato", Arial, sans-serif !important; }
+        #font-select option[value="atkinson-hyperlegible"] { font-family: "Atkinson Hyperlegible", Verdana, sans-serif !important; }
+        #font-select option[value="times-new-roman"] { font-family: "Times New Roman", Times, serif !important; }
+
+        /* Text-size settings */
+        html[data-text-size="small"] {
+            --chosen-size: 14px;
+        }
+
+        html[data-text-size="medium"] {
+            --chosen-size: 16px;
+        }
+
+        html[data-text-size="large"] {
+            --chosen-size: 18px;
+        }
+
+        html[data-text-size="extra-large"] {
+            --chosen-size: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--page-bg);
+            color: var(--text-color);
+            font-family: var(--chosen-font), sans-serif;
+            font-size: var(--chosen-size);
+            line-height: 1.65;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        button,
+        select {
+            font: inherit;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        select:focus-visible {
+            outline: 3px solid var(--focus-color);
+            outline-offset: 4px;
+        }
+
+        /* Main page header */
+        .page-shell {
+            width: min(100% - 40px, 1000px);
+            margin: 0 auto;
+            padding: 48px 0 76px;
+        }
+
+        .page-heading {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(26px, 5vw, 46px);
+            margin-bottom: 28px;
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+        }
+
+        .heading-content {
+            position: relative;
+            z-index: 1;
+            max-width: 650px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 30px;
+            background: var(--burgundy-light);
+            color: var(--burgundy);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .eyebrow-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            overflow-wrap: anywhere;
+        }
+
+        h1 {
+            margin: 20px 0 12px;
+            color: var(--burgundy-dark);
+            font-size: clamp(2.15rem, 5vw, 3.25rem);
+            line-height: 1.12;
+            letter-spacing: -1.2px;
+        }
+
+        .page-description {
+            max-width: 600px;
+            margin: 0;
+            color: var(--muted-color);
+            font-size: 1.03em;
+        }
+
+        .heading-decoration {
+            position: absolute;
+            top: -60px;
+            right: -45px;
+            width: 235px;
+            height: 235px;
+            border-radius: 50%;
+            background: var(--burgundy-light);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .heading-decoration::before,
+        .heading-decoration::after {
+            position: absolute;
+            content: "";
+            border: 1px solid var(--burgundy);
+            border-radius: 50%;
+            opacity: 0.25;
+        }
+
+        .heading-decoration::before {
+            inset: 25px;
+        }
+
+        .heading-decoration::after {
+            inset: 55px;
+        }
+
+        /* Settings cards */
+        .settings-card {
+            margin: 22px 0;
+            padding: clamp(22px, 4vw, 32px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 27px;
+        }
+
+        .section-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 15px;
+            background: var(--burgundy-light);
+            color: var(--burgundy);
+            font-size: 1.3rem;
+        }
+
+        .card-heading h2 {
+            margin: 0 0 5px;
+            color: var(--burgundy-dark);
+            font-size: 1.3em;
+            line-height: 1.3;
+        }
+
+        .card-heading p {
+            margin: 0;
+            color: var(--muted-color);
+            font-size: 0.91em;
+        }
+
+        .setting-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(220px, 0.8fr);
+            align-items: center;
+            gap: 25px;
+            padding: 23px 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .setting-row:first-of-type {
+            border-top: 0;
+        }
+
+        .setting-copy {
+            min-width: 0;
+        }
+
+        .setting-label {
+            margin: 0 0 5px;
+            color: var(--text-color);
+            font-weight: 750;
+        }
+
+        .setting-row label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-weight: 750;
+        }
+
+        .setting-help {
+            margin: 0;
+            color: var(--muted-color);
+            font-size: 0.86em;
+            line-height: 1.6;
+        }
+
+        .control-wrap {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .setting-row select {
+            display: block;
+            width: 100%;
+            min-height: 49px;
+            padding: 11px 42px 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 13px;
+            background-color: var(--field-bg);
+            color: var(--text-color);
+            font-family: var(--chosen-font), sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .setting-row select:hover {
+            border-color: var(--burgundy);
+        }
+
+        /* Small preview under the controls */
+        .appearance-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .preview-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            color: var(--muted-color);
+            font-size: 0.76rem;
+        }
+
+        .preview-swatch {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--burgundy);
+        }
+
+        .theme-swatches {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .theme-choice {
+            position: relative;
+            display: flex;
+            min-width: 0;
+            min-height: 48px;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: border-color 160ms ease, background-color 160ms ease;
+        }
+
+        .setting-row .theme-choice {
+            display: flex;
+            margin-bottom: 0;
+        }
+
+        .theme-choice:hover {
+            border-color: var(--burgundy);
+            background: var(--surface-soft);
+        }
+
+        .theme-choice input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            clip-path: inset(50%);
+        }
+
+        .theme-choice input:focus-visible + .theme-swatch {
+            outline: 3px solid var(--focus-color);
+            outline-offset: 3px;
+        }
+
+        .theme-choice:has(input:checked) {
+            border: 2px solid var(--burgundy);
+            background: var(--surface-soft);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--burgundy), transparent 78%);
+        }
+
+        .theme-swatch {
+            position: relative;
+            display: inline-grid;
+            flex: 0 0 34px;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--swatch-primary) 50%, var(--swatch-bg) 50%);
+        }
+
+        .theme-choice input:checked + .theme-swatch {
+            border: 3px solid var(--swatch-primary);
+        }
+
+        .theme-choice input:checked + .theme-swatch::after {
+            content: "✓";
+            display: grid;
+            width: 18px;
+            height: 18px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--swatch-primary);
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .theme-choice[data-theme-value="high-contrast"] input:checked + .theme-swatch::after {
+            background: #111111;
+            color: #FFEB70;
+        }
+
+        .theme-name {
+            min-width: 0;
+            flex: 1 1 0;
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 420px) {
+            .theme-swatches {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .theme-choice {
+                padding-inline: 7px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .theme-swatches {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .theme-choice {
+                transition: none;
+            }
+        }
+
+        /* Reset card */
+        .reset-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: clamp(22px, 4vw, 30px);
+            margin-top: 28px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            background: var(--surface-soft);
+        }
+
+        .reset-card[hidden] {
+            display: none;
+        }
+
+        .reset-copy {
+            min-width: 0;
+        }
+
+        .reset-copy h2 {
+            margin: 0 0 7px;
+            color: var(--burgundy-dark);
+            font-size: 1.15em;
+        }
+
+        .reset-copy p {
+            margin: 0;
+            color: var(--muted-color);
+            font-size: 0.9em;
+        }
+
+        .reset-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 46px;
+            padding: 11px 19px;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 13px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-weight: 750;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .reset-button:hover {
+            border-color: var(--burgundy);
+            background: var(--burgundy-light);
+        }
+
+        #settings-status {
+            min-height: 1.6em;
+            margin: 15px 0 0;
+            color: var(--muted-color);
+            font-size: 0.9em;
+        }
+
+        /* Footer */
+        footer {
+            padding: 25px 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--muted-color);
+            text-align: center;
+            font-size: 0.85em;
+        }
+
+        /* High-contrast outlines */
+        html[data-scheme="high-contrast"] .page-heading,
+        html[data-scheme="high-contrast"] .settings-card,
+        html[data-scheme="high-contrast"] .reset-card,
+        html[data-scheme="high-contrast"] .setting-row select,
+        html[data-scheme="high-contrast"] .reset-button {
+            border-width: 2px;
+        }
+
+        html[data-theme="dark"] .reset-button {
+            color: var(--text-color);
+        }
+
+        /* Responsive layout */
+        @media (max-width: 700px) {
+            .page-shell {
+                width: min(100% - 28px, 1000px);
+                padding: 28px 0 48px;
+            }
+
+            .page-heading {
+                border-radius: 22px;
+            }
+
+            .heading-decoration {
+                right: -120px;
+                opacity: 0.35;
+            }
+
+            .setting-row {
+                grid-template-columns: 1fr;
+                gap: 13px;
+                padding: 20px 0;
+            }
+
+            .reset-card {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .reset-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .card-heading {
+                gap: 11px;
+            }
+
+            .section-icon {
+                width: 42px;
+                height: 42px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+        {% include "_navigation.html" %}
+
+    <main class="page-shell">
+        <header class="page-heading">
+            <div class="heading-content">
+                <span class="eyebrow">
+                    <span class="eyebrow-dot" aria-hidden="true"></span>
+                    Personalize your experience
+                </span>
+
+                <h1>Accessibility Settings</h1>
+
+                <p class="page-description">
+                    Make the website more comfortable to use. Adjust the colors,
+                    display mode, font, and text size to suit your reading
+                    preferences. Your choices are saved in this browser.
+                </p>
+            </div>
+
+            <div class="heading-decoration" aria-hidden="true"></div>
+        </header>
+
+        <!-- Appearance -->
+        <section class="settings-card" aria-labelledby="appearance-title">
+            <div class="card-heading">
+                <div class="section-icon" aria-hidden="true">◐</div>
+                <div>
+                    <h2 id="appearance-title">Appearance</h2>
+                    <p>Choose how the website looks on your screen.</p>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-copy">
+                    <label for="theme-select">Display mode</label>
+                    <p class="setting-help">
+                        Choose a light interface or a darker interface that may
+                        feel more comfortable in dim environments.
+                    </p>
+                </div>
+
+                <div class="control-wrap">
+                    <select id="theme-select" name="theme">
+                        <option value="light">☀️ Light mode</option>
+                        <option value="dark">🌙 Dark mode</option>
+                    </select>
+                    </div>
+            <div class="setting-row">
+                <div class="setting-copy">
+                    <p class="setting-label" id="color-theme-label">Color Theme</p>
+                    <p class="setting-help">
+                        Choose a coordinated palette. High Contrast uses strong
+                        black, white, yellow, and visible outlines.
+                    </p>
+                </div>
+
+                <div class="control-wrap">
+                    <div class="theme-swatches" role="radiogroup" aria-labelledby="color-theme-label">
+                        <label class="theme-choice" data-theme-value="burgundy-cream" style="--swatch-primary:#702F3D;--swatch-bg:#F7F5EC">
+                            <input type="radio" name="colorTheme" value="burgundy-cream" checked>
+                            <span class="theme-swatch" aria-hidden="true"></span><span class="theme-name">Burgundy &amp; Cream</span>
+                        </label>
+                        <label class="theme-choice" data-theme-value="sage-ivory" style="--swatch-primary:#365C4A;--swatch-bg:#F8F6ED">
+                            <input type="radio" name="colorTheme" value="sage-ivory">
+                            <span class="theme-swatch" aria-hidden="true"></span><span class="theme-name">Sage &amp; Ivory</span>
+                        </label>
+                        <label class="theme-choice" data-theme-value="medical-blue" style="--swatch-primary:#173B63;--swatch-bg:#F1F6FC">
+                            <input type="radio" name="colorTheme" value="medical-blue">
+                            <span class="theme-swatch" aria-hidden="true"></span><span class="theme-name">Medical Blue</span>
+                        </label>
+                        <label class="theme-choice" data-theme-value="teal-mint" style="--swatch-primary:#145B59;--swatch-bg:#F2FAF7">
+                            <input type="radio" name="colorTheme" value="teal-mint">
+                            <span class="theme-swatch" aria-hidden="true"></span><span class="theme-name">Teal &amp; Mint</span>
+                        </label>
+                        <label class="theme-choice" data-theme-value="lavender-white" style="--swatch-primary:#514477;--swatch-bg:#F7F5FC">
+                            <input type="radio" name="colorTheme" value="lavender-white">
+                            <span class="theme-swatch" aria-hidden="true"></span><span class="theme-name">Lavender &amp; White</span>
+                        </label>
+                        <label class="theme-choice" data-theme-value="high-contrast" style="--swatch-primary:#111111;--swatch-bg:#FFEB70">
+                            <input type="radio" name="colorTheme" value="high-contrast">
+                            <span class="theme-swatch" aria-hidden="true"></span><span class="theme-name">High Contrast</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Text and readability -->
+        <section class="settings-card" aria-labelledby="readability-title">
+            <div class="card-heading">
+                <div class="section-icon" aria-hidden="true">Aa</div>
+                <div>
+                    <h2 id="readability-title">Text and readability</h2>
+                    <p>Adjust the text to make reading more comfortable.</p>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-copy">
+                    <label for="font-select">Font style</label>
+                    <p class="setting-help">
+                        Try different typefaces to find one that works best for
+                        you. Each option is shown in its typeface where your
+                        browser supports font previews.
+                    </p>
+                </div>
+
+                <div class="control-wrap">
+                    <select id="font-select" name="font">
+                        <option value="arial">Arial</option>
+                        <option value="verdana">Verdana</option>
+                        <option value="georgia">Georgia</option>
+                        <option value="opendyslexic">OpenDyslexic</option>
+                        <option value="inter">Inter</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="nunito-sans">Nunito Sans</option>
+                        <option value="lato">Lato</option>
+                        <option value="atkinson-hyperlegible">Atkinson Hyperlegible</option>
+                        <option value="times-new-roman">Times New Roman</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-copy">
+                    <label for="text-size-select">Text size</label>
+                    <p class="setting-help">
+                        Increase the text size for easier reading or make it
+                        smaller to fit more content on the screen.
+                    </p>
+                </div>
+
+                <div class="control-wrap">
+                    <select id="text-size-select" name="textSize">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium (default)</option>
+                        <option value="large">Large</option>
+                        <option value="extra-large">Extra large</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reset settings -->
+        <section class="reset-card" id="reset-settings-card" aria-labelledby="reset-title" hidden>
+            <div class="reset-copy">
+                <h2 id="reset-title">Want to start fresh?</h2>
+                <p>
+                    Restore light mode, Burgundy &amp; Cream, Arial, and medium
+                    text size.
+                </p>
+            </div>
+
+            <button type="button" class="reset-button" id="reset-settings">
+                <span aria-hidden="true">↺</span>
+                Reset preferences
+            </button>
+        </section>
+
+        <p id="settings-status" role="status" aria-live="polite"></p>
+    </main>
+
+    <footer>
+        Anemia Detection Project | Student Research for Educational Purposes
+    </footer>
+</body>
+</html>

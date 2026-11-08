@@ -1,0 +1,904 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anemia Detection | Student Research</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+
+    <script>
+        /* Apply saved preferences before the page renders. */
+        try {
+            const saved = JSON.parse(
+                localStorage.getItem("anemiaAccessibilitySettings") || "{}"
+            );
+
+            const defaults = {
+                theme: "light",
+                scheme: "default",
+                colorTheme: "burgundy-cream",
+                font: "arial",
+                textSize: "medium"
+            };
+
+            const settings = { ...defaults, ...saved };
+            const validFonts = ["arial", "verdana", "georgia", "opendyslexic", "inter", "roboto", "nunito-sans", "lato", "atkinson-hyperlegible", "times-new-roman"];
+            if (!validFonts.includes(settings.font)) settings.font = "arial";
+            if (!settings.colorTheme || !["burgundy-cream", "sage-ivory", "medical-blue", "teal-mint", "lavender-white", "high-contrast"].includes(settings.colorTheme)) {
+                settings.colorTheme = saved.scheme === "soft" ? "sage-ivory" : saved.scheme === "high-contrast" ? "high-contrast" : "burgundy-cream";
+            }
+            const root = document.documentElement;
+
+            root.dataset.theme = settings.theme;
+            root.dataset.scheme = "default";
+            root.dataset.colorTheme = settings.colorTheme;
+            root.dataset.font = settings.font;
+            root.dataset.textSize = settings.textSize;
+        } catch (error) {
+            /* The default styling will be used if preferences cannot be read. */
+        }
+    </script>
+
+    <script>
+        document.addEventListener("error", event => {
+            const image = event.target;
+            if (!(image instanceof HTMLImageElement) || !image.dataset.fallbackSrc) {
+                return;
+            }
+
+            const fallback = image.dataset.fallbackSrc;
+            delete image.dataset.fallbackSrc;
+            image.src = fallback;
+        }, true);
+    </script>
+
+    {% include "_font_assets.html" %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='accessibility.js') }}" defer></script>
+
+    <style>
+        :root {
+            color-scheme: light;
+
+            --cream: #F7F5EC;
+            --burgundy: #702F3D;
+            --burgundy-dark: #49202C;
+            --burgundy-light: #F5E9EB;
+            --white: #FFFFFF;
+            --text: #30302E;
+            --muted: #6F6868;
+            --border: #E4D8D6;
+            --page-bg: var(--cream);
+            --surface-bg: #FFFFFF;
+            --section-bg: #FAF8F2;
+            --body-text: #30302E;
+            --heading-text: #49202C;
+            --link-text: #702F3D;
+            --hero-start: #F7F0E8;
+            --hero-end: #F5E9EB;
+            --card-shadow: 0 8px 25px #49202C08;
+        }
+
+        /* Dark mode */
+        html[data-theme="dark"] {
+            color-scheme: dark;
+
+            --cream: #29252A;
+            --burgundy: #E2A7B5;
+            --burgundy-dark: #F1D7DE;
+            --burgundy-light: #45323B;
+            --white: #201E22;
+            --text: #F0EAF0;
+            --muted: #C8BDC8;
+            --border: #494149;
+            --page-bg: #201E22;
+            --surface-bg: #29262B;
+            --section-bg: #262329;
+            --body-text: #F0EAF0;
+            --heading-text: #F1D7DE;
+            --link-text: #F0B9C7;
+            --hero-start: #30272D;
+            --hero-end: #28242B;
+            --card-shadow: 0 8px 25px #00000025;
+        }
+
+        /* Alternative color schemes */
+        html[data-scheme="soft"] {
+            --cream: #F0F1E8;
+            --burgundy: #506B61;
+            --burgundy-dark: #344B42;
+            --burgundy-light: #E0EAE3;
+            --border: #D6DFD6;
+            --muted: #52645A;
+            --link-text: #3F6253;
+            --hero-start: #EAF1E8;
+            --hero-end: #F0EDE3;
+        }
+
+        html[data-theme="dark"][data-scheme="soft"] {
+            --cream: #252E2A;
+            --burgundy: #B2D5C2;
+            --burgundy-dark: #D7EADF;
+            --burgundy-light: #34463D;
+            --border: #45574D;
+            --muted: #C2D0C6;
+            --link-text: #BDE0CC;
+            --hero-start: #27352E;
+            --hero-end: #2D3029;
+        }
+
+        html[data-scheme="high-contrast"] {
+            --cream: #FFFFFF;
+            --burgundy: #720000;
+            --burgundy-dark: #380000;
+            --burgundy-light: #FFE4E4;
+            --text: #000000;
+            --muted: #292929;
+            --border: #555555;
+            --page-bg: #FFFFFF;
+            --surface-bg: #FFFFFF;
+            --section-bg: #F2F2F2;
+            --body-text: #000000;
+            --heading-text: #380000;
+            --link-text: #720000;
+            --hero-start: #FFFFFF;
+            --hero-end: #EEEEEE;
+        }
+
+        html[data-theme="dark"][data-scheme="high-contrast"] {
+            --cream: #000000;
+            --burgundy: #FFFF00;
+            --burgundy-dark: #FFFF66;
+            --burgundy-light: #242400;
+            --white: #000000;
+            --text: #FFFFFF;
+            --muted: #EEEEEE;
+            --border: #FFFFFF;
+            --page-bg: #000000;
+            --surface-bg: #000000;
+            --section-bg: #101010;
+            --body-text: #FFFFFF;
+            --heading-text: #FFFF66;
+            --link-text: #FFFF00;
+            --hero-start: #080808;
+            --hero-end: #181818;
+            --card-shadow: none;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        /* Font preferences */
+        html[data-font="arial"] body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        html[data-font="verdana"] body {
+            font-family: Verdana, Geneva, sans-serif;
+        }
+
+        html[data-font="georgia"] body {
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        html[data-font="opendyslexic"] body {
+            font-family: "OpenDyslexic", Verdana, sans-serif;
+            letter-spacing: 0.025em;
+            word-spacing: 0.08em;
+            line-height: 1.85;
+        }
+
+        /* Text-size preferences */
+        html[data-text-size="small"] {
+            font-size: 14px;
+        }
+
+        html[data-text-size="medium"] {
+            font-size: 16px;
+        }
+
+        html[data-text-size="large"] {
+            font-size: 18px;
+        }
+
+        html[data-text-size="extra-large"] {
+            font-size: 20px;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page-bg);
+            color: var(--body-text);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.7;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(
+                145deg,
+                var(--hero-start),
+                var(--page-bg) 65%,
+                var(--hero-end)
+            );
+            padding: 90px 7%;
+        }
+
+        .hero-inner {
+            max-width: 1250px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 55px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 7px 15px;
+            border-radius: 30px;
+            background: var(--burgundy-light);
+            border: 1px solid var(--border);
+            color: var(--link-text);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        h1, h2, h3 {
+            color: var(--heading-text);
+            line-height: 1.2;
+        }
+
+        h1, h2 {
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        html[data-font="arial"] h1,
+        html[data-font="arial"] h2,
+        html[data-font="arial"] h3 {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        html[data-font="verdana"] h1,
+        html[data-font="verdana"] h2,
+        html[data-font="verdana"] h3 {
+            font-family: Verdana, Geneva, sans-serif;
+        }
+
+        html[data-font="georgia"] h1,
+        html[data-font="georgia"] h2,
+        html[data-font="georgia"] h3 {
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        html[data-font="opendyslexic"] h1,
+        html[data-font="opendyslexic"] h2,
+        html[data-font="opendyslexic"] h3 {
+            font-family: "OpenDyslexic", Verdana, sans-serif;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 5.5vw, 5rem);
+            letter-spacing: -2px;
+            margin: 24px 0;
+        }
+
+        .hero p {
+            max-width: 620px;
+            font-size: 1.15rem;
+            color: var(--muted);
+        }
+
+        .hero-art {
+            position: relative;
+            padding: 20px;
+        }
+
+        .hero-art img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 4;
+            object-fit: cover;
+            border-radius: 35px;
+            box-shadow: 0 22px 55px #49202C20;
+        }
+
+        .floating-label {
+            position: absolute;
+            background: var(--surface-bg);
+            color: var(--link-text);
+            padding: 13px 17px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px #49202C20;
+            font-weight: 700;
+        }
+
+        .label-top {
+            top: 0;
+            left: 0;
+        }
+
+        .label-bottom {
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Buttons */
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 25px;
+            border-radius: 40px;
+            background: var(--burgundy);
+            color: var(--page-bg);
+            font-weight: 700;
+            text-decoration: none;
+            border: 2px solid var(--burgundy);
+            transition: 0.25s ease;
+        }
+
+        .btn:hover {
+            background: var(--burgundy-dark);
+            border-color: var(--burgundy-dark);
+            color: var(--page-bg);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: var(--surface-bg);
+            color: var(--link-text);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--burgundy-light);
+            color: var(--heading-text);
+            border-color: var(--burgundy);
+        }
+
+        /* Content sections */
+        .content-section {
+            padding: 85px 7%;
+            background: var(--page-bg);
+        }
+
+        .section-inner {
+            max-width: 1150px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 65px;
+            align-items: center;
+        }
+
+        .section-inner.reverse .section-image {
+            order: 2;
+        }
+
+        .section-inner.reverse .section-copy {
+            order: 1;
+        }
+
+        .section-tag {
+            color: var(--link-text);
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .section-copy h2,
+        .center-heading h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin: 12px 0 22px;
+        }
+
+        .section-copy p {
+            font-size: 1.04rem;
+            color: var(--muted);
+        }
+
+        .section-image {
+            position: relative;
+        }
+
+        .section-image::before {
+            content: "";
+            position: absolute;
+            inset: 8px -8px -8px 8px;
+            border-radius: 26px;
+            background: var(--burgundy-light);
+            transform: rotate(2deg);
+        }
+
+        .section-image img {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 26px;
+            box-shadow: 0 15px 35px #49202C18;
+        }
+
+        .mission-section,
+        .features-section {
+            background: var(--section-bg);
+        }
+
+        /* Feature cards */
+        .center-heading {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 48px;
+        }
+
+        .center-heading p {
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .feature-grid {
+            max-width: 1150px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: var(--surface-bg);
+            color: var(--body-text);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            transition: 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 35px #49202C15;
+        }
+
+        .feature-icon {
+            width: 65px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 19px;
+            background: var(--burgundy-light);
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin: 0 0 12px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            margin-bottom: 0;
+        }
+
+        /* Questionnaire call to action */
+        .cta-section {
+            text-align: center;
+            padding: 80px 7%;
+            background: linear-gradient(
+                135deg,
+                var(--burgundy),
+                var(--burgundy-dark)
+            );
+            color: var(--page-bg);
+        }
+
+        .cta-inner {
+            max-width: 780px;
+            margin: auto;
+        }
+
+        .cta-section h2 {
+            color: var(--page-bg);
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin: 18px 0;
+        }
+
+        .cta-section p {
+            color: var(--page-bg);
+            font-size: 1.08rem;
+        }
+
+        .cta-section .btn {
+            margin-top: 20px;
+            background: var(--page-bg);
+            color: var(--link-text);
+            border-color: var(--page-bg);
+        }
+
+        .cta-section .btn:hover {
+            background: var(--cream);
+            color: var(--heading-text);
+        }
+
+        .disclaimer {
+            max-width: 900px;
+            margin: 30px auto 0;
+            font-size: 0.82rem !important;
+            opacity: 0.95;
+        }
+
+        .cta-section .disclaimer {
+            padding: 0;
+            color: var(--page-bg);
+            background: transparent;
+            border: 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: var(--surface-bg);
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive layout */
+        @media (max-width: 850px) {
+            .hero-inner,
+            .section-inner {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+
+            .hero {
+                padding: 60px 6%;
+            }
+
+            .hero-art {
+                max-width: 540px;
+                width: 100%;
+                margin: auto;
+            }
+
+            .section-inner.reverse .section-image,
+            .section-inner.reverse .section-copy {
+                order: initial;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-section {
+                padding: 60px 6%;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .hero h1 {
+                letter-spacing: -1px;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            .button-row .btn {
+                width: 100%;
+            }
+
+            .feature-card {
+                padding: 24px;
+            }
+        }
+
+        /* Respect reduced-motion preferences. */
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+        body { font-family: Inter, "Segoe UI", system-ui, sans-serif; }
+        h1, h2, h3, h4 { letter-spacing: -.025em; }
+        .card, .feature-card, .cta-inner { border-radius: 22px; }
+    </style>
+</head>
+
+<body>
+    {% include "_navigation.html" %}
+
+    <header class="hero">
+        <div class="hero-inner">
+            <div>
+                <span class="eyebrow">● Research Prototype</span>
+
+                <h1>Rethinking Anemia Screening</h1>
+
+                <p>
+                    Exploring accessible, noninvasive technology for preliminary
+                    anemia screening using camera-based imaging to help identify
+                    people who may benefit from further medical evaluation.
+                </p>
+
+                <div class="button-row">
+                    <a class="btn" href="/about">
+                        Learn About the Project <span>→</span>
+                    </a>
+
+                    <a class="btn btn-outline" href="/questionnaire">
+                        Take the Questionnaire
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-art">
+                <img
+                    src="https://images.pexels.com/photos/4226119/pexels-photo-4226119.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900"
+                    alt="Medical research and healthcare"
+                    data-fallback-src="https://images.pexels.com/photos/7659560/pexels-photo-7659560.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900"
+                >
+
+                <div class="floating-label label-top">
+                    🩸 Hemoglobin Research
+                </div>
+
+                <div class="floating-label label-bottom">
+                    👁️ Camera-Based Imaging
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="content-section" id="understanding">
+            <div class="section-inner">
+                <div class="section-copy">
+                    <span class="section-tag">Understanding</span>
+
+                    <h2>What Is Anemia?</h2>
+
+                    <p>
+                        Anemia is a common medical condition in which the body does not have
+                        enough healthy red blood cells or sufficient hemoglobin to carry
+                        oxygen efficiently throughout the body. Hemoglobin is the protein
+                        found in red blood cells that transports oxygen from the lungs to
+                        the body's tissues and organs, allowing them to function properly.
+                        When oxygen delivery is reduced, individuals may experience symptoms
+                        such as fatigue, weakness, dizziness, pale skin, headaches, shortness
+                        of breath, and difficulty concentrating.
+                    </p>
+
+                    <p>
+                        Anemia can be caused by a variety of factors, including iron
+                        deficiency, vitamin deficiencies, chronic diseases, blood loss, or
+                        inherited genetic disorders. Because its symptoms often develop
+                        gradually and can easily be mistaken for everyday tiredness or
+                        stress, many people remain unaware that they have anemia until the
+                        condition becomes more advanced. Early detection is essential, as
+                        timely diagnosis and treatment can help prevent serious health
+                        complications and improve overall quality of life.
+                    </p>
+                </div>
+
+                <div class="section-image">
+                    <img
+                        src="https://images.pexels.com/photos/4226769/pexels-photo-4226769.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900"
+                        alt="Healthcare professional working in a medical setting"
+                        loading="lazy"
+                    >
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section mission-section">
+            <div class="section-inner reverse">
+                <div class="section-image">
+                    <img
+                        src="https://images.pexels.com/photos/7659560/pexels-photo-7659560.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900"
+                        alt="Medical technology and health research"
+                        loading="lazy"
+                    >
+                </div>
+
+                <div class="section-copy">
+                    <span class="section-tag">Purpose</span>
+
+                    <h2>Our Mission</h2>
+
+                    <p>
+                        Our mission is to make early anemia detection more accessible, affordable,
+                        and effective through innovative technology and scientific research. We are
+                        developing a solution that explores new ways to identify individuals who may
+                        be at risk for anemia before serious symptoms develop. By combining advances
+                        in artificial intelligence with medical research, we aim to increase
+                        awareness of this common yet often overlooked condition while providing a
+                        simple, non-invasive approach to early screening. Our goal is to empower
+                        individuals to recognize potential signs of anemia sooner, encourage timely
+                        medical evaluation, and ultimately improve health outcomes through earlier
+                        detection and intervention.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-inner">
+                <div class="section-copy">
+                    <span class="section-tag">Impact</span>
+
+                    <h2>Why This Matters</h2>
+
+                    <p>
+                        Early detection of anemia is essential because it allows individuals to seek
+                        medical evaluation and treatment before the condition becomes more severe.
+                        When left undiagnosed or untreated, anemia can negatively affect physical
+                        health, cognitive function, academic and workplace performance, and overall
+                        quality of life. Although anemia affects millions of people worldwide, many
+                        cases go undetected because the symptoms often develop gradually and are
+                        easily mistaken for everyday fatigue or stress. Through our research, we aim
+                        to explore innovative methods for supporting earlier screening, increasing
+                        public awareness, and encouraging timely medical evaluation. By promoting
+                        early recognition, we hope to contribute to better health outcomes and help
+                        reduce the long-term impact of this common yet frequently overlooked
+                        condition.
+                    </p>
+
+                    <p>
+                        Early detection of anemia is essential because it allows
+                        individuals to seek medical evaluation and treatment before
+                        the condition becomes more severe. When left undiagnosed or
+                        untreated, anemia can negatively affect physical health,
+                        cognitive function, academic and workplace performance,
+                        and overall quality of life. Although anemia affects millions
+                        of people worldwide, many cases go undetected because the
+                        symptoms often develop gradually and are easily mistaken
+                        for everyday fatigue or stress. Through our research, we
+                        aim to explore innovative methods for supporting earlier
+                        screening, increasing public awareness, and encouraging
+                        timely medical evaluation. By promoting early recognition,
+                        we hope to contribute to better health outcomes and help
+                        reduce the long-term impact of this common yet frequently
+                        overlooked condition.
+                    </p>
+                </div>
+
+                <div class="section-image">
+                    <img
+                        src="https://images.pexels.com/photos/4226219/pexels-photo-4226219.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900"
+                        alt="Laboratory and medical research"
+                        loading="lazy"
+                    >
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section features-section" id="features">
+            <div class="center-heading">
+                <span class="section-tag">Our Approach</span>
+                <h2>Key Features</h2>
+
+                <p>
+                    Three pillars guiding our exploration of accessible anemia screening.
+                </p>
+            </div>
+
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <h3>Noninvasive Technology</h3>
+
+                    <p>
+                        Our research explores the use of camera-based 
+                        imaging to investigate whether visible signs associated 
+                        with anemia can be identified without the need for a 
+                        blood draw. By analyzing subtle visual features with 
+                        advanced imaging technology and artificial intelligence, 
+                        we aim to evaluate the potential of a fast, non-invasive, and 
+                        accessible approach to support early anemia screening.
+                    </p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Accessible Screening</h3>
+
+                    <p>
+                        Our research investigates whether everyday devices, 
+                        such as smartphones and digital cameras, can be used 
+                        to make preliminary anemia screening more accessible, 
+                        convenient, and widely available. By leveraging technology that 
+                        many people already have access to, we hope to explore a simple, 
+                        non-invasive approach that could support earlier screening and 
+                        encourage individuals to seek timely medical evaluation when needed.
+                    </p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <h3>Research-Driven Insights</h3>
+
+                    <p>
+                        Our research explores the relationship between 
+                        external eye images and laboratory-measured hemoglobin 
+                        levels to determine whether subtle visual indicators of 
+                        anemia can be identified through advanced image analysis. 
+                        By comparing eye images with clinical hemoglobin measurements, 
+                        we aim to investigate the potential of a non-invasive, 
+                        technology-driven approach for supporting early anemia screening 
+                        and advancing research in accessible healthcare.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="cta-inner">
+                <div style="font-size: 2.5rem;" aria-hidden="true">♡</div>
+
+                <h2>Explore Our Questionnaire</h2>
+
+                <p>
+                    Learn more about the questionnaire that supports 
+                    our student research on non-invasive anemia screening. 
+                    Before choosing to participate, we encourage you to review 
+                    the information provided to understand the purpose of the 
+                    study, what participation involves, and how your responses 
+                    will contribute to our research. Your participation 
+                    is entirely voluntary and plays an important role in 
+                    helping us explore innovative approaches to early anemia 
+                    screening.
+                </p>
+
+                <a class="btn" href="/questionnaire">
+                    Start the Questionnaire <span>→</span>
+                </a>
+
+                <p class="disclaimer">
+                    Educational student research prototype only. This project is not a
+                    validated diagnostic tool and cannot diagnose or rule out anemia.
+                    Medical diagnosis requires appropriate clinical evaluation and testing.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        Anemia Detection Project | Student Research for Educational Purposes
+    </footer>
+</body>
+</html>
